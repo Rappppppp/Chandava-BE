@@ -29,4 +29,14 @@ class Room extends Model
     {
         return $this->belongsToMany(Inclusion::class, "room_inclusions");
     }
+
+    public function images()
+    {
+        return $this->hasMany(RoomImage::class);
+    }
+
+    public function mainImage()
+    {
+        return $this->hasOne(RoomImage::class)->where('is_main_image', true);
+    }
 }

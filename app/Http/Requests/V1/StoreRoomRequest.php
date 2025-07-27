@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreRoomRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class StoreRoomRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,21 @@ class StoreRoomRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'room_name' => [
+                'required',
+                'string',
+                Rule::unique('rooms', 'room_name')->ignore($this->room),
+            ],
+            'accommodation_type_id' => ['exists:accommodation_types,id'],
+            'description' => ['nullable', 'string'],
+            'day_night_tour_price' => ['nullable', 'numeric'],
+            'overnight_price' => ['nullable', 'numeric'],
+            'notes' => ['nullable', 'string'],
+            'is_already_check_in' => ['boolean'],
+            'inclusion_ids' => ['nullable', 'array'],
+            'images' => ['required', 'array'],
+            'inclusion_ids.*' => ['exists:inclusions,id'],
+            'images.*' => ['exists:fileponds,name'],
         ];
     }
 }
