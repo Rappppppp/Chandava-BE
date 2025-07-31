@@ -14,6 +14,10 @@ class RoomImage extends Model
         "room_id",
     ];
 
+    protected $casts = [
+        'is_main_image' => 'boolean',
+    ];
+
     public function room()
     {
         return $this->belongsTo(Room::class);

@@ -20,6 +20,10 @@ class Room extends Model
         "is_already_check_in",
     ];
 
+    protected $casts = [
+        'is_already_check_in' => 'boolean',
+    ];
+
     public function accommodationType()
     {
         return $this->belongsTo(AccommodationType::class);
