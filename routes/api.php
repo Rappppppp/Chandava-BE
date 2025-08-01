@@ -10,6 +10,12 @@ use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\FilepondController;
 use App\Http\Controllers\Api\V1\ContactUsFormController;
 use App\Http\Controllers\Api\V1\MyBookingController;
+use App\Http\Controllers\Api\V1\FeedbackController;
+use App\Http\Controllers\Api\V1\MessageController;
+use App\Http\Controllers\Api\V1\ConversationController;
+
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -39,8 +45,9 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
     // Authenticated routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
-        Route::get('/my-booking', [MyBookingController::class, 'userIndex']);
         Route::apiResource('bookings', MyBookingController::class);
+        Route::patch('/update-booking-status', [MyBookingController::class, 'updateStatus']);
+        Route::post('/feedbacks', [FeedbackController::class, 'store']);
         Route::apiResource('users', UserController::class);
         Route::apiResource('accommodation-types', AccommodationTypeController::class);
         Route::apiResource('inclusions', InclusionController::class);
@@ -49,5 +56,13 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
 
         Route::post('filepond', [FilepondController::class, 'store']);
         Route::delete('filepond', [FilepondController::class, 'revoke']);
+
+
+        Route::prefix('conversations')->group(function () {
+            Route::post('/store', [ConversationController::class, 'store']);
+            Route::get('/{user_id}', [ConversationController::class, 'index']);
+            Route::get('/{conversation}/messages', [ConversationController::class, 'messages']);
+            Route::post('/{conversation}/messages', [ConversationController::class, 'sendMessage']);
+        });
     });
 });

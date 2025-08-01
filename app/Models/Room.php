@@ -43,4 +43,14 @@ class Room extends Model
     {
         return $this->hasOne(RoomImage::class)->where('is_main_image', true);
     }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
+    }
+
+    public function avgRating()
+    {
+        return $this->feedbacks()->avg('rate');
+    }
 }

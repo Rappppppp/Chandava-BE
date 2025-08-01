@@ -26,9 +26,6 @@ class MyBookingResource extends JsonResource
             'status' => $this->status,
             'receipt' => $this->receipt,
             'admin_note' => $this->admin_note,
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
-
             // Optional: include related models
             'user' => new UserResource($this->whenLoaded('user')),
             'room' => new RoomResource($this->whenLoaded('room')),

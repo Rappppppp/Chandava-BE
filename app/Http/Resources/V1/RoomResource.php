@@ -25,6 +25,8 @@ class RoomResource extends JsonResource
             "accommodation_type" => new AccommodationTypeResource($this->accommodationType),
             'room_inclusions' => RoomInclusionResource::collection($this->inclusions),
             "room_images" => RoomImageResource::collection($this->images),
+            'feedbacks' => FeedbackResource::collection($this->feedbacks),
+            "avg_rating" => number_format($this->avgRating(), 1),
         ];
     }
 }

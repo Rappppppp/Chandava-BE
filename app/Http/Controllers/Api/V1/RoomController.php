@@ -20,7 +20,10 @@ class RoomController extends Controller
     {
         //
         $filter = new RoomFilter($request);
-        $inclusions = $filter->apply(Room::query())->with('accommodationType', 'inclusions', 'images')->get();
+        $inclusions = $filter->apply(Room::query())
+            ->with('accommodationType', 'inclusions', 'images', 'feedbacks')
+            ->withAvg('feedbacks', 'rate')
+            ->get();
         return RoomResource::collection($inclusions);
     }
 
