@@ -11,7 +11,7 @@ use App\Http\Controllers\Api\V1\FilepondController;
 use App\Http\Controllers\Api\V1\ContactUsFormController;
 use App\Http\Controllers\Api\V1\MyBookingController;
 use App\Http\Controllers\Api\V1\FeedbackController;
-use App\Http\Controllers\Api\V1\MessageController;
+use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\ConversationController;
 
 
@@ -56,6 +56,10 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
 
         Route::post('filepond', [FilepondController::class, 'store']);
         Route::delete('filepond', [FilepondController::class, 'revoke']);
+
+        Route::get('dashboard', [DashboardController::class, 'index']);
+
+        Route::patch('/update-check-in-status', [RoomController::class, 'updateIsAlreadyCheckedIn']);
 
 
         Route::prefix('conversations')->group(function () {

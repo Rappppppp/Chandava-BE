@@ -44,4 +44,17 @@ class AccommodationTypeController extends Controller
             'accommodation_type' => new AccommodationTypeResource($accommodationType),
         ], 200);
     }
+
+    public function destroy($id)
+    {
+        $accommodation = AccommodationType::find($id);
+
+        if (!$accommodation) {
+            return response()->json(['message' => 'Accommodation type not found.'], 404);
+        }
+
+        $accommodation->delete();
+
+        return response()->json(['message' => 'Accommodation type deleted successfully.']);
+    }
 }

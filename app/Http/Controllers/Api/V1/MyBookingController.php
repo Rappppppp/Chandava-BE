@@ -7,6 +7,7 @@ use App\Http\Resources\V1\MyBookingResource;
 use App\Http\Requests\V1\StoreMyBookingRequest;
 use App\Filters\MyBookingFilter;
 use App\Models\MyBooking;
+use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,11 +27,23 @@ class MyBookingController extends Controller
     {
         $validated = $request->validate([
             'id' => 'required|exists:my_bookings,id',
-            'status' => 'required|string|in:pending,confirmed,cancelled', // Adjust valid statuses if needed
+            'status' => 'required|string|in:pending,confirmed,cancelled,completed', // Adjust valid statuses if needed
         ]);
+
+
 
         $booking = MyBooking::find($validated['id']);
         $booking->status = $validated['status'];
+      
+        if ($booking->status === 'completed') {
+            // Assuming your MyBooking model has a `room_id` foreign key
+            $room = Room::find($booking->room_id);
+
+            if ($room) {
+                $room->is_already_check_in = false;
+                $room->save();
+            }
+        }
         $booking->save();
 
         return response()->json([

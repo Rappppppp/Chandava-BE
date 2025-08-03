@@ -34,6 +34,26 @@ class RoomController extends Controller
         );
     }
 
+    public function updateIsAlreadyCheckedIn(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => 'required|exists:rooms,id',
+            'status' => 'required|boolean',
+        ]);
+
+        // Find the room by ID
+        $room = Room::find($validated['id']);
+
+        // Update the is_already_check_in status
+        $room->is_already_check_in = $validated['status'];
+        $room->save();
+
+        return response()->json([
+            'message' => 'Room check-in status updated successfully.',
+            'room' => $room,
+        ]);
+    }
+
     public function store(StoreRoomRequest $request)
     {
         try {

@@ -40,8 +40,21 @@ class InclusionController extends Controller
     {
         $inclusion->update($request->only('inclusion_name'));
         return response()->json([
-            'message'=> 'Inclusion updated successfully',
+            'message' => 'Inclusion updated successfully',
             'inclusion' => new InclusionResource($inclusion),
         ], 200);
+    }
+
+    public function destroy($id)
+    {
+        $inclusion = Inclusion::find($id);
+
+        if (!$inclusion) {
+            return response()->json(['message' => 'Inclusion not found.'], 404);
+        }
+
+        $inclusion->delete();
+
+        return response()->json(['message' => 'Inclusion deleted successfully.']);
     }
 }
