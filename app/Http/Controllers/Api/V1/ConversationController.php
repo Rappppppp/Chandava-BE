@@ -25,14 +25,14 @@ class ConversationController extends Controller
     // Create a new conversation (or return existing)
     public function store(Request $request)
     {
-        // Validate required fields (excluding the `unique` rule for now)
+        // Validate required fields
         $request->validate([
             'user_id' => 'required|integer',
             'receiver_id' => 'required|integer',
             'title' => 'required|string|max:255',
         ]);
 
-        // First check if a conversation with the same title exists
+        // Check if a conversation with the same title already exists
         $existingConversation = Conversation::where('title', $request->title)->first();
 
         if ($existingConversation) {
@@ -42,27 +42,17 @@ class ConversationController extends Controller
             ]);
         }
 
-        // Check if conversation between the same two users exists (regardless of title)
-        $conversation = Conversation::whereHas(
-            'users',
-            fn($q) =>
-            $q->where('user_id', $request->user_id)
-        )->whereHas(
-            'users',
-            fn($q) =>
-            $q->where('user_id', $request->receiver_id)
-        )->first();
+        // Always create a new conversation with this title
+        $conversation = Conversation::create([
+            'title' => $request->title,
+        ]);
 
-        if (!$conversation) {
-            $conversation = Conversation::create([
-                'title' => $request->title,
-            ]);
-
-            $conversation->users()->attach([$request->user_id, $request->receiver_id]);
-        }
+        // Attach both users
+        $conversation->users()->attach([$request->user_id, $request->receiver_id]);
 
         return response()->json($conversation->load('users'));
     }
+
 
     // Get messages in a conversation
     public function messages(Conversation $conversation)

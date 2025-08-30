@@ -24,6 +24,13 @@ class FeedbackResource extends JsonResource
                 'id' => $this->user->id,
                 'name' => $this->user->name,
             ],
+            'images' => $this->images->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'image' => $image->image,
+                ];
+            }),
+
             'created_at' => $this->created_at,
         ];
     }

@@ -26,6 +26,8 @@ class StoreFeedbackRequest extends FormRequest
             'room_id' => ['required', 'exists:rooms,id'],
             'rate' => ['required', 'integer', 'min:1', 'max:5'],
             'comment' => ['required', 'string'],
+            'images' => ['sometimes', 'array'],
+            'images.*' => ['exists:fileponds,name'],
         ];
     }
 }

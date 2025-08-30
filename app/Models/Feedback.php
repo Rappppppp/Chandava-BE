@@ -27,4 +27,8 @@ class Feedback extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function images(){
+        return $this->hasMany(FeedbackImage::class, 'feedback_id');
+    }
 }
