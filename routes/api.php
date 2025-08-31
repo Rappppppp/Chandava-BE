@@ -39,25 +39,33 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
 
 
     Route::get('/public-rooms', [RoomController::class, 'index']);
+    Route::get('/feedbacks', [FeedbackController::class, 'index']);
 
-    Route::apiResource('/contact-us', ContactUsFormController::class);
+    Route::post('/contact-us', [ContactUsFormController::class, 'store']);
+    Route::get('/contact-us', [ContactUsFormController::class, 'index']);
 
     // Authenticated routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
         Route::apiResource('bookings', MyBookingController::class);
         Route::patch('/update-booking-status', [MyBookingController::class, 'updateStatus']);
+        Route::patch('/update-booking-date', [MyBookingController::class, 'updateDate']);
         Route::post('/feedbacks', [FeedbackController::class, 'store']);
+        Route::post('/feedbacks-response', [FeedbackController::class, 'storeResponse']);
+
         Route::apiResource('users', UserController::class);
         Route::apiResource('accommodation-types', AccommodationTypeController::class);
         Route::apiResource('inclusions', InclusionController::class);
         Route::apiResource('rooms', RoomController::class);
+        // Route::get('/contact-us', [ContactUsFormController::class, 'index']);
 
 
         Route::post('filepond', [FilepondController::class, 'store']);
         Route::delete('filepond', [FilepondController::class, 'revoke']);
 
         Route::get('dashboard', [DashboardController::class, 'index']);
+
+
 
         Route::patch('/update-check-in-status', [RoomController::class, 'updateIsAlreadyCheckedIn']);
 

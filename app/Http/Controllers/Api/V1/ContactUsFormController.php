@@ -17,7 +17,7 @@ class ContactUsFormController extends Controller
     {
         $filters = new ContactUsFormFilter($request);
         $contactUsForm = $filters->apply(ContactUsForm::query())->get();
-        return ContactUsFormResource::collection($contactUsForm);
+        return response()->json(ContactUsFormResource::collection($contactUsForm));
     }
 
     public function store(StoreContactUsFormRequest $request)

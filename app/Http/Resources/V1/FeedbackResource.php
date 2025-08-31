@@ -30,6 +30,7 @@ class FeedbackResource extends JsonResource
                     'image' => $image->image,
                 ];
             }),
+            'response' => $this->response,
 
             'created_at' => $this->created_at,
         ];

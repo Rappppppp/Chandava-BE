@@ -34,7 +34,7 @@ class MyBookingController extends Controller
 
         $booking = MyBooking::find($validated['id']);
         $booking->status = $validated['status'];
-      
+
         if ($booking->status === 'completed') {
             // Assuming your MyBooking model has a `room_id` foreign key
             $room = Room::find($booking->room_id);
@@ -51,6 +51,27 @@ class MyBookingController extends Controller
             'booking' => $booking
         ]);
     }
+
+    public function updateDate(Request $request)
+    {
+        $validated = $request->validate([
+            'id'        => ['required', 'exists:my_bookings,id'],
+            'check_in'  => ['required', 'date'],
+            'check_out' => ['required', 'date', 'after:check_in'], // ensures check_out > check_in
+        ]);
+
+        $booking = MyBooking::findOrFail($validated['id']);
+
+        $booking->check_in  = $validated['check_in'];
+        $booking->check_out = $validated['check_out'];
+        $booking->save();
+
+        return response()->json([
+            'message' => 'Booking dates updated successfully.',
+            'booking' => $booking,
+        ]);
+    }
+
 
 
     public function store(StoreMyBookingRequest $request)
