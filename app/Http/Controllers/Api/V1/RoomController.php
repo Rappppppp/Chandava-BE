@@ -27,6 +27,17 @@ class RoomController extends Controller
         return RoomResource::collection($inclusions);
     }
 
+    public function deleteRoom($id)
+    {
+        $room = Room::findOrFail($id);
+
+        $room->is_deleted = true;
+        $room->save();
+
+        return response()->json(['message' => 'Deleted successfully.']);
+    }
+
+
     public function show(Room $room)
     {
         return new RoomResource(
@@ -53,6 +64,8 @@ class RoomController extends Controller
             'room' => $room,
         ]);
     }
+
+
 
     public function store(StoreRoomRequest $request)
     {

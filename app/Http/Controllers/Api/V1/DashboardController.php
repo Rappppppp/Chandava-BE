@@ -26,9 +26,9 @@ class DashboardController extends Controller
         $totalRevenue = MyBooking::where('status', 'completed')->sum('total_price');
 
         // Count of rooms where is_already_check_in is false
-        $availableRoomCount = Room::where('is_already_check_in', false)->count();
+        $availableRoomCount = Room::where('is_already_check_in', false)->where('is_deleted', false)->count();
 
-       $recentBookings = MyBooking::latest()->take(5)->with(['user', 'room'])->get();
+        $recentBookings = MyBooking::latest()->take(5)->with(['user', 'room'])->get();
 
         return response()->json([
             'total_bookings' => $bookingCount,

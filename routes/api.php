@@ -57,6 +57,7 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
         Route::apiResource('accommodation-types', AccommodationTypeController::class);
         Route::apiResource('inclusions', InclusionController::class);
         Route::apiResource('rooms', RoomController::class);
+        Route::patch('/delete-room/{id}', [RoomController::class, 'deleteRoom']);
         // Route::get('/contact-us', [ContactUsFormController::class, 'index']);
 
 

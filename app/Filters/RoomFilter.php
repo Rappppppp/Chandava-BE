@@ -10,6 +10,7 @@ class RoomFilter extends QueryFilter
             'id' => ['eq', 'gt', 'gte', 'lt', 'lte', 'in'],
             'room_name' => ['like', 'eq'],
             'is_already_check_in' => ['eq', 'ne'],
+            'is_deleted' => ['eq', 'ne'],
         ];
     }
 }
