@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\V1\MyBookingController;
 use App\Http\Controllers\Api\V1\FeedbackController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\ConversationController;
+use App\Http\Controllers\Api\V1\ChangeScheduleRequestController;
+
 
 
 
@@ -43,6 +45,13 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
 
     Route::post('/contact-us', [ContactUsFormController::class, 'store']);
     Route::get('/contact-us', [ContactUsFormController::class, 'index']);
+
+    Route::prefix('change-schedule')->group(function () {
+        Route::get('/', [ChangeScheduleRequestController::class, 'index']);
+        Route::post('/', [ChangeScheduleRequestController::class, 'store']);
+        Route::get('/get/{user_id}', [ChangeScheduleRequestController::class, 'getByUserId']);
+        Route::post('/change-status', [ChangeScheduleRequestController::class, 'changeStatus']);
+    });
 
     // Authenticated routes
     Route::middleware('auth:sanctum')->group(function () {
