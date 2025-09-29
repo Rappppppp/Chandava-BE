@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\FeedbackController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\ConversationController;
 use App\Http\Controllers\Api\V1\ChangeScheduleRequestController;
+use App\Http\Controllers\Api\V1\AnalyticsController;
 
 
 
@@ -39,6 +40,7 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    Route::get('/analytics', [AnalyticsController::class, 'index']);
 
     Route::get('/public-rooms', [RoomController::class, 'index']);
     Route::get('/feedbacks', [FeedbackController::class, 'index']);
@@ -52,6 +54,8 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
         Route::get('/get/{user_id}', [ChangeScheduleRequestController::class, 'getByUserId']);
         Route::post('/change-status', [ChangeScheduleRequestController::class, 'changeStatus']);
     });
+
+      Route::get('/analytics', [AnalyticsController::class, 'index']);
 
     // Authenticated routes
     Route::middleware('auth:sanctum')->group(function () {
@@ -86,5 +90,7 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
             Route::get('/{conversation}/messages', [ConversationController::class, 'messages']);
             Route::post('/{conversation}/messages', [ConversationController::class, 'sendMessage']);
         });
+
+      
     });
 });
