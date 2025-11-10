@@ -28,6 +28,11 @@ class StoreAccommodationTypeRequest extends FormRequest
                 'string',
                 Rule::unique('accommodation_types', 'accommodation_type_name')->ignore($this->accommodation_type),
             ],
+            'max_guests' => [
+                'required',
+                'integer',
+                'max:100'
+            ]
         ];
     }
 }

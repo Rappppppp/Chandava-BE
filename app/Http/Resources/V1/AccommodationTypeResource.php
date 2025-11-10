@@ -17,6 +17,7 @@ class AccommodationTypeResource extends JsonResource
         return [
             'id' => $this->id,
             'accommodation_type_name' => $this->accommodation_type_name,
+            'max_guests' => $this->max_guests,
         ];
     }
 }

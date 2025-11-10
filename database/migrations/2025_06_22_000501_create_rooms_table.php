@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('overnight_price', 8, 2)->nullable();
             $table->text('notes')->nullable();
             $table->boolean('is_already_check_in')->default(false);
+            $table->dateTime('deleted_at')->nullable();
             $table->timestamps();
         });
     }

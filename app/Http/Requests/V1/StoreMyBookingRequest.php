@@ -24,7 +24,7 @@ class StoreMyBookingRequest extends FormRequest
         return [
             'user_id' => ['required', 'exists:users,id'],
             'room_id' => ['required', 'exists:rooms,id'],
-            'no_guests' => ['required', 'min:1'],
+            // 'no_guests' => ['required', 'min:1'],
             'check_in' => ['required', 'date', 'after_or_equal:today'],
             'total_price' => ['required'],
             'check_out' => ['required', 'date', 'after:check_in'],

@@ -21,7 +21,7 @@ return new class extends Migration
 
             // ✅ booking_id: NO ACTION (default) to avoid multiple cascade paths
             $table->foreignId('booking_id')
-                ->constrained('my_bookings', 'id')
+                ->constrained('bookings', 'id')
                 ->onDelete('no action');
 
             $table->string('status')->default('pending');

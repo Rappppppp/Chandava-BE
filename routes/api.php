@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AssistantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
@@ -36,6 +37,9 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
     Route::get('/', function () {
         return 'Welcome to Chandava API';
     });
+    
+    Route::post('/assistant', [AssistantController::class, 'handle']);
+
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -55,12 +59,13 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
         Route::post('/change-status', [ChangeScheduleRequestController::class, 'changeStatus']);
     });
 
-      Route::get('/analytics', [AnalyticsController::class, 'index']);
+    Route::get('/analytics', [AnalyticsController::class, 'index']);
 
     // Authenticated routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
         Route::apiResource('bookings', MyBookingController::class);
+        Route::get('/booking/{booking}', [MyBookingController::class, 'show']);
         Route::patch('/update-booking-status', [MyBookingController::class, 'updateStatus']);
         Route::patch('/update-booking-date', [MyBookingController::class, 'updateDate']);
         Route::post('/feedbacks', [FeedbackController::class, 'store']);
@@ -77,9 +82,18 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
         Route::post('filepond', [FilepondController::class, 'store']);
         Route::delete('filepond', [FilepondController::class, 'revoke']);
 
-        Route::get('dashboard', [DashboardController::class, 'index']);
-
-
+        Route::controller(DashboardController::class)
+            ->prefix('/dashboard')
+            ->group(function() {
+                Route::get('/', 'index'); 
+                
+                Route::prefix('/reports')
+                    ->group(function() {
+                        Route::get('/', 'getReports');
+                        Route::get('/get-booking-years', 'getBookingYears');
+                        Route::get('/get-report-details', 'getReportDetails');
+                    });
+            });
 
         Route::patch('/update-check-in-status', [RoomController::class, 'updateIsAlreadyCheckedIn']);
 
@@ -91,6 +105,6 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
             Route::post('/{conversation}/messages', [ConversationController::class, 'sendMessage']);
         });
 
-      
+
     });
 });

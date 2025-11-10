@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Auth;
 
 class MyBookingController extends Controller
 {
-    //
-
     public function index(Request $request)
     {
         $filters = new MyBookingFilter($request);
@@ -23,14 +21,17 @@ class MyBookingController extends Controller
         // return MyBookingResource::collection(MyBooking::with(['user', 'room'])->get());
     }
 
+    public function show(MyBooking $booking)
+    {
+        return;
+    }
+
     public function updateStatus(Request $request)
     {
         $validated = $request->validate([
-            'id' => 'required|exists:my_bookings,id',
+            'id' => 'required|exists:bookings,id',
             'status' => 'required|string|in:pending,confirmed,cancelled,completed', // Adjust valid statuses if needed
         ]);
-
-
 
         $booking = MyBooking::find($validated['id']);
         $booking->status = $validated['status'];
@@ -55,7 +56,7 @@ class MyBookingController extends Controller
     public function updateDate(Request $request)
     {
         $validated = $request->validate([
-            'id'        => ['required', 'exists:my_bookings,id'],
+            'id'        => ['required', 'exists:bookings,id'],
             'check_in'  => ['required', 'date'],
             'check_out' => ['required', 'date', 'after:check_in'], // ensures check_out > check_in
         ]);

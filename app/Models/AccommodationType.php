@@ -10,7 +10,8 @@ class AccommodationType extends Model
     use HasFactory;
 
     protected $fillable = [
-        'accommodation_type_name'
+        'accommodation_type_name',
+        'max_guests'
     ];
 
     public function room(Room $room)

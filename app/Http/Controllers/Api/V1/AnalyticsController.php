@@ -14,9 +14,9 @@ class AnalyticsController extends Controller
     //
     public function index()
     {
-        $total = Room::where('is_deleted', false)->count();
-        $available = Room::where('is_deleted', false)->where('is_already_check_in', false)->count();
-        $occupied = Room::where('is_deleted', false)->where('is_already_check_in', true)->count();
+        $total = Room::whereNull('deleted_at')->count();
+        $available = Room::whereNull('deleted_at')->where('is_already_check_in', false)->count();
+        $occupied = Room::whereNull('deleted_at')->where('is_already_check_in', true)->count();
 
         // Daily sales
         $dailySale = MyBooking::where('status', 'completed')

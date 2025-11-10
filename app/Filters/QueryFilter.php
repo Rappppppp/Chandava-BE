@@ -66,6 +66,17 @@ abstract class QueryFilter
         $query = $query ?: $this->builder;
         $method = $boolean === 'or' ? 'orWhere' : 'where';
 
+        // 🔧 Special handling for soft deletes
+        if ($field === 'deleted_at') {
+            if ($operator === 'eq' && $value == 0) {
+                return $query->{$boolean === 'or' ? 'orWhereNull' : 'whereNull'}('deleted_at');
+            }
+
+            if ($operator === 'ne' && $value == 0) {
+                return $query->{$boolean === 'or' ? 'orWhereNotNull' : 'whereNotNull'}('deleted_at');
+            }
+        }
+
         $operatorMap = [
             'eq' => '=',
             'ne' => '!=',

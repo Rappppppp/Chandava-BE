@@ -31,7 +31,7 @@ class RoomController extends Controller
     {
         $room = Room::findOrFail($id);
 
-        $room->is_deleted = true;
+        $room->deleted_at = now();
         $room->save();
 
         return response()->json(['message' => 'Deleted successfully.']);

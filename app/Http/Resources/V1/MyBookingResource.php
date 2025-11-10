@@ -18,7 +18,7 @@ class MyBookingResource extends JsonResource
             'id' => $this->id,
             'user_id' => $this->user_id,
             'room_id' => $this->room_id,
-            'no_guests' => $this->no_guests,
+            // 'no_guests' => $this->no_guests,
             'check_in' => $this->check_in->toDateString(),
             'check_out' => $this->check_out->toDateString(),
             'tour_type' => $this->tour_type,
@@ -29,6 +29,8 @@ class MyBookingResource extends JsonResource
             // Optional: include related models
             'user' => new UserResource($this->whenLoaded('user')),
             'room' => new RoomResource($this->whenLoaded('room')),
+
+            'feedback' => $this->feedback,
         ];
     }
 }

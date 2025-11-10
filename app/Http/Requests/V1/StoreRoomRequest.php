@@ -31,7 +31,7 @@ class StoreRoomRequest extends FormRequest
                     Rule::unique('rooms', 'room_name')
                         ->ignore($this->room) // ignore current room if updating
                         ->where(function ($query) {
-                            $query->where('is_deleted', false);
+                            $query->whereNull('deleted_at');
                         }),
                 ],
                 'accommodation_type_id' => ['exists:accommodation_types,id'],
@@ -53,7 +53,7 @@ class StoreRoomRequest extends FormRequest
                     Rule::unique('rooms', 'room_name')
                         ->ignore($this->room) // ignore current room if updating
                         ->where(function ($query) {
-                            $query->where('is_deleted', false);
+                            $query->whereNull('deleted_at');
                         }),
                 ],
                 'accommodation_type_id' => ['exists:accommodation_types,id'],

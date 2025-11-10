@@ -23,7 +23,7 @@ class AccommodationTypeController extends Controller
 
     public function store(StoreAccommodationTypeRequest $request)
     {
-        $accommodationType = AccommodationType::create($request->only('accommodation_type_name'));
+        $accommodationType = AccommodationType::create($request->only(['accommodation_type_name', 'max_guests']));
 
         return response()->json([
             'message' => 'Accommodation type created successfully',
@@ -38,7 +38,7 @@ class AccommodationTypeController extends Controller
 
     public function update(UpdateAccommodationTypeRequest $request, AccommodationType $accommodationType)
     {
-        $accommodationType->update($request->only('accommodation_type_name'));
+        $accommodationType->update($request->only('accommodation_type_name', 'max_guests'));
         return response()->json([
             'message' => 'Accommodation type updated successfully',
             'accommodation_type' => new AccommodationTypeResource($accommodationType),

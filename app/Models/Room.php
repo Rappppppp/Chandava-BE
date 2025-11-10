@@ -18,12 +18,12 @@ class Room extends Model
         "overnight_price",
         "notes",
         "is_already_check_in",
-        "is_deleted",
+        "deleted_at",
     ];
 
     protected $casts = [
         'is_already_check_in' => 'boolean',
-        'is_deleted' => 'boolean',
+        'deleted_at' => 'datetime'
     ];
 
     public function accommodationType()
