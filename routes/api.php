@@ -1,26 +1,21 @@
 <?php
 
-use App\Http\Controllers\Api\V1\AssistantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
-use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\AssistantController;
 use App\Http\Controllers\Api\V1\AccommodationTypeController;
+use App\Http\Controllers\Api\V1\ContactUsFormController;
+use App\Http\Controllers\Api\V1\ConversationController;
+use App\Http\Controllers\Api\V1\ChangeScheduleRequestController;
+use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\InclusionController;
 use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\FilepondController;
-use App\Http\Controllers\Api\V1\ContactUsFormController;
 use App\Http\Controllers\Api\V1\MyBookingController;
 use App\Http\Controllers\Api\V1\FeedbackController;
 use App\Http\Controllers\Api\V1\DashboardController;
-use App\Http\Controllers\Api\V1\ConversationController;
-use App\Http\Controllers\Api\V1\ChangeScheduleRequestController;
 use App\Http\Controllers\Api\V1\AnalyticsController;
-
-
-
-
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -37,58 +32,84 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
     Route::get('/', function () {
         return 'Welcome to Chandava API';
     });
-    
+
     Route::post('/assistant', [AssistantController::class, 'handle']);
 
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::controller(AuthController::class)
+        ->group(function () {
+            Route::post('/login', 'login');
+            Route::post('/register', 'register');
+            Route::post('/logout', 'logout');
+        });
 
     Route::get('/analytics', [AnalyticsController::class, 'index']);
 
     Route::get('/public-rooms', [RoomController::class, 'index']);
     Route::get('/feedbacks', [FeedbackController::class, 'index']);
 
-    Route::post('/contact-us', [ContactUsFormController::class, 'store']);
-    Route::get('/contact-us', [ContactUsFormController::class, 'index']);
+    Route::controller(ContactUsFormController::class)
+        ->prefix('/contact-us')
+        ->group(function () {
+            Route::post('/', 'store');
+            Route::get('/', 'index');
+        });
 
-    Route::prefix('change-schedule')->group(function () {
-        Route::get('/', [ChangeScheduleRequestController::class, 'index']);
-        Route::post('/', [ChangeScheduleRequestController::class, 'store']);
-        Route::get('/get/{user_id}', [ChangeScheduleRequestController::class, 'getByUserId']);
-        Route::post('/change-status', [ChangeScheduleRequestController::class, 'changeStatus']);
-    });
+    Route::prefix('/homepage')
+        ->group(function () {
+            Route::get('/feedbacks', [FeedbackController::class, 'top']);
+        });
+
+    Route::controller(ChangeScheduleRequestController::class)
+        ->prefix('change-schedule')
+        ->group(function () {
+            Route::get('/', 'index');
+            Route::post('/', 'store');
+            Route::get('/get/{user_id}', 'getByUserId');
+            Route::post('/change-status', 'changeStatus');
+        });
 
     Route::get('/analytics', [AnalyticsController::class, 'index']);
 
     // Authenticated routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
+
         Route::apiResource('bookings', MyBookingController::class);
-        Route::get('/booking/{booking}', [MyBookingController::class, 'show']);
-        Route::patch('/update-booking-status', [MyBookingController::class, 'updateStatus']);
-        Route::patch('/update-booking-date', [MyBookingController::class, 'updateDate']);
-        Route::post('/feedbacks', [FeedbackController::class, 'store']);
-        Route::post('/feedbacks-response', [FeedbackController::class, 'storeResponse']);
+        Route::controller(MyBookingController::class)
+            ->group(function () {
+                Route::get('/booking/{booking}', 'show');
+                Route::patch('/update-booking-status', 'updateStatus');
+                Route::patch('/update-booking-date', 'updateDate');
+            });
+
+        Route::controller(FeedbackController::class)
+            ->group(function () {
+                Route::post('/feedbacks', 'store');
+                Route::post('/feedbacks-response', 'storeResponse');
+            });
 
         Route::apiResource('users', UserController::class);
         Route::apiResource('accommodation-types', AccommodationTypeController::class);
         Route::apiResource('inclusions', InclusionController::class);
+
+        // Room controller
         Route::apiResource('rooms', RoomController::class);
         Route::patch('/delete-room/{id}', [RoomController::class, 'deleteRoom']);
         // Route::get('/contact-us', [ContactUsFormController::class, 'index']);
 
-
-        Route::post('filepond', [FilepondController::class, 'store']);
-        Route::delete('filepond', [FilepondController::class, 'revoke']);
+        Route::controller(FilepondController::class)
+            ->group(function () {
+                Route::post('filepond', 'store');
+                Route::delete('filepond', 'revoke');
+            });
 
         Route::controller(DashboardController::class)
             ->prefix('/dashboard')
-            ->group(function() {
-                Route::get('/', 'index'); 
-                
+            ->group(function () {
+                Route::get('/', 'index');
+
                 Route::prefix('/reports')
-                    ->group(function() {
+                    ->group(function () {
                         Route::get('/', 'getReports');
                         Route::get('/get-booking-years', 'getBookingYears');
                         Route::get('/get-report-details', 'getReportDetails');
@@ -97,14 +118,13 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
 
         Route::patch('/update-check-in-status', [RoomController::class, 'updateIsAlreadyCheckedIn']);
 
-
-        Route::prefix('conversations')->group(function () {
-            Route::post('/store', [ConversationController::class, 'store']);
-            Route::get('/{user_id}', [ConversationController::class, 'index']);
-            Route::get('/{conversation}/messages', [ConversationController::class, 'messages']);
-            Route::post('/{conversation}/messages', [ConversationController::class, 'sendMessage']);
-        });
-
-
+        Route::controller(ConversationController::class)
+            ->prefix('conversations')
+            ->group(function () {
+                Route::post('/store', 'store');
+                Route::get('/{user_id}', 'index');
+                Route::get('/{conversation}/messages', 'messages');
+                Route::post('/{conversation}/messages', 'sendMessage');
+            });
     });
 });

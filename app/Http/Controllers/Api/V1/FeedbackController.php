@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\StoreFeedbackRequest;
+use App\Http\Resources\V1\FeedbackPublicResource;
 use App\Http\Resources\V1\FeedbackResource;
 use App\Models\Feedback;
 
@@ -14,9 +15,19 @@ class FeedbackController extends Controller
 {
     public function index()
     {
-        $feedback = Feedback::all();
-        return response()->json(FeedbackResource::collection($feedback));
+        return response()->json(FeedbackResource::collection(Feedback::all()));
     }
+
+    public function top()
+    {
+        return response()->json(FeedbackPublicResource::collection(
+            Feedback::where('rate', '>', '3')
+                            ->limit(10)
+                            ->orderByDesc('rate')
+                            ->get()
+        ));
+    }
+
     public function store(StoreFeedbackRequest $request)
     {
         $feedback = DB::transaction(function () use ($request) {
