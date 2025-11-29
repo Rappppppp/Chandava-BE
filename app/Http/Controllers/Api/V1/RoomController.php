@@ -18,13 +18,28 @@ class RoomController extends Controller
     //
     public function index(Request $request)
     {
-        //
         $filter = new RoomFilter($request);
-        $inclusions = $filter->apply(Room::query())
-            ->with('accommodationType', 'inclusions', 'images', 'feedbacks')
-            ->withAvg('feedbacks', 'rate')
-            ->get();
-        return RoomResource::collection($inclusions);
+
+        $baseQuery = $filter->apply(Room::query())
+
+            ->withAvg('feedbacks', 'rate');
+
+        if (auth()->check()) {
+            $rooms = $baseQuery
+                ->with(['accommodationType', 'inclusions', 'images', 'feedbacks'])
+                ->get();
+        } else {
+            // SQL Server: filter using raw subquery, not the alias
+            $rooms = $baseQuery
+                ->with(['accommodationType', 'inclusions', 'images'])
+                ->whereHas('feedbacks', function ($q) {
+                    $q->where('rate', '>=', 4);
+                })
+                ->limit(10)
+                ->get();
+        }
+
+        return RoomResource::collection($rooms);
     }
 
     public function deleteRoom($id)

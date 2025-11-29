@@ -71,7 +71,11 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
     Route::get('/analytics', [AnalyticsController::class, 'index']);
 
     // Authenticated routes
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(
+        app()->isProduction()
+        ? ['auth:sanctum']
+        : [] // no middleware in non-production
+    )->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
 
         Route::apiResource('bookings', MyBookingController::class);

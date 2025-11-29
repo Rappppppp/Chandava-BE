@@ -15,10 +15,29 @@ class MyBookingController extends Controller
 {
     public function index(Request $request)
     {
-        $filters = new MyBookingFilter($request);
-        $myBooking = $filters->apply(MyBooking::query())->with(['user', 'room'])->get();
-        return MyBookingResource::collection($myBooking);
-        // return MyBookingResource::collection(MyBooking::with(['user', 'room'])->get());
+        $query = MyBooking::with(['user', 'room']);
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%$search%")
+                    ->orWhereHas('user', function ($q2) use ($search) {
+                        $q2->where('first_name', 'like', "%$search%")
+                            ->orWhere('last_name', 'like', "%$search%");
+                    })
+                    ->orWhereHas('room', function ($q3) use ($search) {
+                        $q3->where('room_name', 'like', "%$search%");
+                    });
+            });
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        $perPage = $request->get('per_page', 10);
+
+        $bookings = $query->paginate($perPage);
+
+        return MyBookingResource::collection($bookings);
     }
 
     public function show(MyBooking $booking)
@@ -56,14 +75,14 @@ class MyBookingController extends Controller
     public function updateDate(Request $request)
     {
         $validated = $request->validate([
-            'id'        => ['required', 'exists:bookings,id'],
-            'check_in'  => ['required', 'date'],
+            'id' => ['required', 'exists:bookings,id'],
+            'check_in' => ['required', 'date'],
             'check_out' => ['required', 'date', 'after:check_in'], // ensures check_out > check_in
         ]);
 
         $booking = MyBooking::findOrFail($validated['id']);
 
-        $booking->check_in  = $validated['check_in'];
+        $booking->check_in = $validated['check_in'];
         $booking->check_out = $validated['check_out'];
         $booking->save();
 

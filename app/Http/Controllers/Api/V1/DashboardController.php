@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Http\Resources\V1\MyBookingResource;
 
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -51,7 +52,7 @@ class DashboardController extends Controller
         return MyBooking::getReports($type, $year);
     }
 
-   public function getReportDetails(Request $request)
+    public function getReportDetails(Request $request)
 {
     $type = $request->input('type', 'daily');
     $year = $request->input('year');
@@ -59,82 +60,61 @@ class DashboardController extends Controller
     $checkIn = $request->input('check_in');
     $checkOut = $request->input('check_out');
 
-    if ($type === 'weekly') {
-        // Get weekly summary with nested bookings
-        $weeks = MyBooking::getReports('weekly', $year);
+    // fetch bookings
+    $bookings = MyBooking::getReportDetails($type, $year, $month, $checkIn, $checkOut);
+    $bookings = collect($bookings);
 
-        $data = $weeks->map(function ($week) use ($year) {
-            $bookings = MyBooking::getReportDetails(
-                'weekly',
-                $year,
-                null,
-                $week->week_start,
-                $week->week_end
-            );
-
-            return [
-                'week_start' => $week->week_start,
-                'week_end' => $week->week_end,
-                'bookings_count' => $week->bookings,
-                'checkIns_count' => $week->checkIns,
-                'payments' => '₱' . number_format($week->payments, 2),
-                'bookings_detail' => $bookings->map(function ($b) {
-                    return [
-                        'id' => $b->id,
-                        'user' => $b->user ? [
-                            'id' => $b->user->id,
-                            'name' => $b->user->first_name . ' ' . $b->user->last_name,
-                            'email' => $b->user->email,
-                        ] : null,
-                        'room' => $b->room ? [
-                            'id' => $b->room->id,
-                            'name' => $b->room->room_name,
-                        ] : null,
-                        'status' => $b->status,
-                        'check_in' => $b->check_in,
-                        'check_out' => $b->check_out,
-                        'payments' => '₱' . number_format($b->total_price, 2),
-                    ];
-                }),
-            ];
-        });
-
-        return response()->json($data);
+    if ($bookings->isEmpty()) {
+        return response()->json([
+            'week_start' => null,
+            'week_end' => null,
+            'bookings_count' => 0,
+            'checkIns_count' => 0,
+            'payments' => '₱0.00',
+            'bookings_detail' => [],
+        ]);
     }
 
-    // Daily or yearly: simple list of bookings
-    $bookings = MyBooking::getReportDetails($type, $year, $month, $checkIn, $checkOut);
+    // compute summary
+    $start = $bookings->map(fn($b) => $b->check_in ? Carbon::parse($b->check_in) : null)
+        ->filter()
+        ->min()?->toDateTimeString();
 
-    $data = $bookings->map(function ($booking) use ($type) {
-        $period = match($type) {
-            'daily' => date('F j, Y', strtotime($booking->check_in)),
-            'yearly' => date('Y', strtotime($booking->check_in)),
-            default => date('M j', strtotime($booking->check_in)) . ' – ' . date('M j, Y', strtotime($booking->check_out)),
-        };
+    $end = $bookings->map(fn($b) => $b->check_out ? Carbon::parse($b->check_out) : null)
+        ->filter()
+        ->max()?->toDateTimeString();
 
+    $bookingsCount = $bookings->count();
+    $checkInsCount = $bookings->filter(fn($b) => !empty($b->check_in))->count();
+    $paymentsTotal = $bookings->sum(fn($b) => (float) ($b->total_price ?? 0));
+
+    $bookingsDetail = $bookings->map(function ($b) {
         return [
-            'id' => $booking->id,
-            'type' => ucfirst($type) . ' Report',
-            'period' => $period,
-            'bookings' => 1, // each row = 1 booking
-            'status' => $booking->status,
-            'payments' => '₱' . number_format($booking->total_price, 2),
-            'year' => date('Y', strtotime($booking->check_in)),
-            'user' => $booking->user ? [
-                'id' => $booking->user->id,
-                'name' => $booking->user->first_name . ' ' . $booking->user->last_name,
-                'email' => $booking->user->email,
+            'id' => $b->id,
+            'user' => $b->user ? [
+                'id' => $b->user->id,
+                'name' => $b->user->first_name . ' ' . $b->user->last_name,
+                'email' => $b->user->email,
             ] : null,
-            'room' => $booking->room ? [
-                'id' => $booking->room->id,
-                'name' => $booking->room->room_name,
+            'room' => $b->room ? [
+                'id' => $b->room->id,
+                'name' => $b->room->room_name,
             ] : null,
-            'check_in' => $booking->check_in,
-            'check_out' => $booking->check_out,
+            'status' => $b->status,
+            'check_in' => $b->check_in,
+            'check_out' => $b->check_out,
+            'payments' => '₱' . number_format($b->total_price ?? 0, 2),
         ];
-    });
+    })->values();
 
-    return response()->json($data);
+    return response()->json([
+        'week_start' => $start,
+        'week_end' => $end,
+        'bookings_count' => $bookingsCount,
+        'checkIns_count' => $checkInsCount,
+        'payments' => '₱' . number_format($paymentsTotal, 2),
+        'bookings_detail' => $bookingsDetail,
+    ]);
 }
 
 }
