@@ -28,7 +28,7 @@ use App\Http\Controllers\Api\V1\AnalyticsController;
 */
 
 
-Route::prefix('v1')->middleware(['web'])->group(function () {
+Route::prefix('v2')->group(function () {
     Route::get('/', function () {
         return 'Welcome to Chandava API';
     });
@@ -71,11 +71,7 @@ Route::prefix('v1')->middleware(['web'])->group(function () {
     Route::get('/analytics', [AnalyticsController::class, 'index']);
 
     // Authenticated routes
-    Route::middleware(
-        app()->isProduction()
-        ? ['auth:sanctum']
-        : [] // no middleware in non-production
-    )->group(function () {
+    Route::middleware('auth:api')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
 
         Route::apiResource('bookings', MyBookingController::class);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Filters\ContactUsFormFilter;
 use App\Http\Resources\V1\ContactUsFormResource;
 use App\Http\Requests\V1\StoreContactUsFormRequest;
+use App\Jobs\ContactUsMailJob;
 use App\Models\ContactUsForm;
 use Illuminate\Http\Request;
 
@@ -23,6 +24,8 @@ class ContactUsFormController extends Controller
     public function store(StoreContactUsFormRequest $request)
     {
         $contact_us = ContactUsForm::create($request->validated());
+
+        ContactUsMailJob::dispatch(data: $contact_us);
 
         return response()->json([
             'message' => 'Message sent successfully!',

@@ -1,0 +1,1 @@
+.dot-animation{animation:dot-blink 1.4s infinite both}@keyframes dot-blink{0%{opacity:0;transform:translate(-3px)}30%{opacity:1;transform:translate(0)}to{opacity:0;transform:translate(3px)}}.delay-200{animation-delay:.2s}.delay-400{animation-delay:.4s}

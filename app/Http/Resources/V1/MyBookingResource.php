@@ -29,7 +29,7 @@ class MyBookingResource extends JsonResource
             // Optional: include related models
             'user' => new UserResource($this->whenLoaded('user')),
             'room' => new RoomResource($this->whenLoaded('room')),
-
+            // 'rate' => $this->rate,
             'feedback' => $this->feedback,
         ];
     }

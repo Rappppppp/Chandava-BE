@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Mail;
 
 class MailTest extends Command
 {
@@ -25,6 +26,9 @@ class MailTest extends Command
      */
     public function handle()
     {
-        //
+        Mail::raw('This is a test from Laravel API :D', function ($message) {
+            $message->to('chandavalakeresortresto@gmail.com', 'Chandava')
+                ->subject('Rap Chandava Test');
+        });
     }
 }

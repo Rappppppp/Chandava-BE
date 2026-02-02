@@ -15,7 +15,15 @@ class MyBookingController extends Controller
 {
     public function index(Request $request)
     {
-        $query = MyBooking::with(['user', 'room']);
+        $user = Auth::user();
+
+        if ($user->role == 'admin') {
+            $query = MyBooking::with(['user', 'room']);
+        } else {
+            $query = MyBooking::where(
+                'user_id', $user->id
+            )->with(['user', 'room']);
+        }
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;

@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+
+// SPA catch-all — exclude API and dist folder
+Route::get('/{any}', function () {
+    return response()->file(public_path('dist/index.html'));
+})->where('any', '^(?!api|dist).*');

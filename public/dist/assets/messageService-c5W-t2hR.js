@@ -1,0 +1,1 @@
+import{g as a}from"./index-D3ZYKOMr.js";const o={createConvo:async s=>(await a.post("/conversations/store",s)).data,getAllConvos:async s=>(await a.get(`/conversations/${s}`)).data,getMessages:async s=>(await a.get(`/conversations/${s}/messages`)).data,postMessage:async(s,e)=>(await a.post(`/conversations/${s}/messages`,e)).data};export{o as M};
