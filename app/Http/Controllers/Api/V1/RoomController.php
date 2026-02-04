@@ -15,8 +15,7 @@ use App\Http\Requests\V1\UpdateRoomRequest;
 
 class RoomController extends Controller
 {
-    //
-    public function index(Request $request)
+    public function publicIndex(Request $request)
     {
         $filter = new RoomFilter($request);
 
@@ -26,20 +25,38 @@ class RoomController extends Controller
 
         if (auth()->check()) {
             $rooms = $baseQuery
-                ->with(['accommodationType', 'inclusions', 'images', 'feedbacks'])
+                ->with(['accommodationType'])
                 ->get();
         } else {
             // SQL Server: filter using raw subquery, not the alias
             $rooms = $baseQuery
                 ->with(['accommodationType', 'inclusions', 'images'])
-                ->whereHas('feedbacks', function ($q) {
-                    $q->where('rate', '>=', 4);
-                })
-                ->limit(10)
+                // ->whereHas('feedbacks', function ($q) {
+                //     $q->where('rate', '>=', 4);
+                // })
+                // ->limit(10)
                 ->get();
         }
 
         return RoomResource::collection($rooms);
+    }
+
+    public function index(Request $request)
+    {
+        $filter = new RoomFilter($request);
+
+        $baseQuery = $filter->apply(Room::query())
+            ->withAvg('feedbacks', 'rate');
+
+        return RoomResource::collection(
+            $baseQuery->paginate()
+            );
+    }
+
+    public function roomList()
+    {
+        return Room::whereNull('deleted_at') // Get available rooms
+                ->get(['id', 'room_name', 'day_night_tour_price', 'overnight_price']);
     }
 
     public function deleteRoom($id)

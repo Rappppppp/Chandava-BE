@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Mail\RegistrationMail;
 use Illuminate\Http\Request;
 use App\Http\Requests\V1\LoginRequest;
 use App\Http\Requests\V1\StoreUserRequest;
@@ -11,6 +12,7 @@ use App\Http\Resources\V1\UserResource;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use Mail;
 
 class AuthController extends Controller
 {
@@ -47,6 +49,9 @@ class AuthController extends Controller
             ]);
 
             $token = auth('api')->login($user);
+
+            Mail::to(config('app.env') === 'production' ? $user->email : 'raphaelherreria@gmail.com')
+                ->send(new RegistrationMail(mailData: $user));
 
             return $this->respondWithToken($token);
         } catch (Exception $e) {
@@ -102,9 +107,9 @@ class AuthController extends Controller
     {
         return response()->json([
             'access_token' => $token,
-            'token_type'   => 'bearer',
-            'expires_in'   => auth('api')->factory()->getTTL() * 60,
-            'user'         => new UserResource(auth('api')->user()),
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'user' => new UserResource(auth('api')->user()),
         ]);
     }
 }

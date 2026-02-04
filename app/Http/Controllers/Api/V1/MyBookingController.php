@@ -6,10 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\MyBookingResource;
 use App\Http\Requests\V1\StoreMyBookingRequest;
 use App\Filters\MyBookingFilter;
+use App\Mail\BookingSuccessMail;
+use App\Mail\ConfirmedBookingMail;
 use App\Models\MyBooking;
 use App\Models\Room;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Mail;
 
 class MyBookingController extends Controller
 {
@@ -21,7 +25,8 @@ class MyBookingController extends Controller
             $query = MyBooking::with(['user', 'room']);
         } else {
             $query = MyBooking::where(
-                'user_id', $user->id
+                'user_id',
+                $user->id
             )->with(['user', 'room']);
         }
 
@@ -63,6 +68,19 @@ class MyBookingController extends Controller
         $booking = MyBooking::find($validated['id']);
         $booking->status = $validated['status'];
 
+        if ($booking->status === 'confirmed' && $booking->user) {
+            Mail::to(config('app.env') === 'production' ? $booking->user?->email : 'raphaelherreria@gmail.com')
+                ->send(new ConfirmedBookingMail(mailData: [
+                    'receipt' => $booking->receipt,
+                    'created_at' => Carbon::parse($booking->created_at)->format('F j, Y'),
+                    'first_name' => $booking->user?->first_name ?? 'Guest',
+                    'tour_type' => $booking->tour_type,
+                    'room_name' => $booking->room->accommodationType->accommodation_type_name,
+                    'guests_count' => $booking->room->accommodationType->max_guests,
+                    'amount' => $booking->total_price,
+                ]));
+        }
+
         if ($booking->status === 'completed') {
             // Assuming your MyBooking model has a `room_id` foreign key
             $room = Room::find($booking->room_id);
@@ -76,7 +94,7 @@ class MyBookingController extends Controller
 
         return response()->json([
             'message' => 'Booking status updated successfully.',
-            'booking' => $booking
+            'booking' => MyBookingResource::make($booking),
         ]);
     }
 
@@ -105,21 +123,68 @@ class MyBookingController extends Controller
     public function store(StoreMyBookingRequest $request)
     {
         $validated = $request->validated();
-        $userId = $validated['user_id'];
 
-        // Check if the user already has a pending booking
+        $user = auth();
+        $userId = $user->id();
+
+        $room = Room::findOrFail($validated['room_id']);
+
+        // Check existing pending booking
         $existingPending = MyBooking::where('user_id', $userId)
-            ->where('status', 'pending') // Adjust 'pending' based on your actual status value
+            ->where('status', 'pending')
             ->exists();
 
-        if ($existingPending) {
+        if ($existingPending && auth()->user()->role === 'user') {
             return response()->json([
-                'message' => 'You have a pending booking, cancel it or wait for tha approval.',
-            ], 422); // 422 Unprocessable Entity
+                'message' => 'You have a pending booking. Cancel it or wait for approval.',
+            ], 422);
         }
 
-        // Create the booking
+        // Dates
+        $checkIn = Carbon::parse($validated['check_in'])->startOfDay();
+        $checkOut = Carbon::parse($validated['check_out'])->startOfDay();
+
+        // Duration (minimum 1)
+        $days = max(1, $checkIn->diffInDays($checkOut));
+
+        // Price calculation
+        switch ($validated['tour_type']) {
+            case 'Day Tour':
+            case 'Night Tour':
+                $totalPrice = $room->day_night_tour_price * $days;
+                break;
+
+            case 'Overnight':
+                $totalPrice = $room->overnight_price * $days;
+                break;
+
+            default:
+                return response()->json([
+                    'message' => 'Invalid booking type.',
+                ], 422);
+        }
+
+        // Attach computed values
+        $validated['user_id'] = $userId;
+        $validated['total_price'] = $totalPrice;
+
+        // Create booking
         $booking = MyBooking::create($validated);
+
+        try {
+            Mail::to($request->email ?? $user->user()->email)
+                ->send(new ConfirmedBookingMail(mailData: [
+                    'receipt' => $booking->receipt,
+                    'created_at' => Carbon::parse($booking->created_at)->format('F j, Y'),
+                    'first_name' => $booking->user->first_name ?? 'Guest',
+                    'tour_type' => $booking->tour_type,
+                    'room_name' => $booking->room->accommodationType->accommodation_type_name,
+                    'guests_count' => $booking->room->accommodationType->max_guests,
+                    'amount' => $booking->total_price,
+                ]));
+        } catch (\Exception $e) {
+            info('Error creating booking: ' . $e->getMessage());
+        }
 
         return response()->json([
             'message' => 'Booking created successfully!',

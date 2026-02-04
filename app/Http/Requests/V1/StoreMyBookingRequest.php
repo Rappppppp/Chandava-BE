@@ -14,6 +14,20 @@ class StoreMyBookingRequest extends FormRequest
         return true;
     }
 
+    public function prepareForValidation()
+    {
+        // Transform tour_type before validation
+        if ($this->has('tour_type')) {
+            $tourType = $this->input('tour_type');
+
+            if ($tourType === 'day') {
+                $this->merge(['tour_type' => 'Day Tour']);
+            } elseif ($tourType === 'night') {
+                $this->merge(['tour_type' => 'Night Tour']);
+            }
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -22,16 +36,17 @@ class StoreMyBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['required', 'exists:users,id'],
+            // 'user_id' => ['required', 'exists:users,id'],
             'room_id' => ['required', 'exists:rooms,id'],
             // 'no_guests' => ['required', 'min:1'],
             'check_in' => ['required', 'date', 'after_or_equal:today'],
-            'total_price' => ['required'],
+            // 'total_price' => ['required'],
             'check_out' => ['required', 'date', 'after:check_in'],
             'tour_type' => ['required', 'string', 'max:100'],
             'status' => ['nullable', 'string', 'in:pending,confirmed,cancelled,completed'],
-            'receipt' => ['required', 'string', 'max:255'],
+            'receipt' => ['nullable', 'string', 'max:255'],
             'admin_note' => ['nullable', 'string'],
+            'email' => ['nullable', 'string', 'email'],
         ];
     }
 }

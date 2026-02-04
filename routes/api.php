@@ -44,7 +44,7 @@ Route::prefix('v2')->group(function () {
 
     Route::get('/analytics', [AnalyticsController::class, 'index']);
 
-    Route::get('/public-rooms', [RoomController::class, 'index']);
+    Route::get('/public-rooms', [RoomController::class, 'publicIndex']);
     Route::get('/feedbacks', [FeedbackController::class, 'index']);
 
     Route::controller(ContactUsFormController::class)
@@ -95,6 +95,7 @@ Route::prefix('v2')->group(function () {
         // Room controller
         Route::apiResource('rooms', RoomController::class);
         Route::patch('/delete-room/{id}', [RoomController::class, 'deleteRoom']);
+        Route::get('/room-list', [RoomController::class, 'roomList']);
         // Route::get('/contact-us', [ContactUsFormController::class, 'index']);
 
         Route::controller(FilepondController::class)
