@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+use function App\Helpers\normalizeDate;
+
 class MyBookingResource extends JsonResource
 {
     /**
@@ -20,8 +22,8 @@ class MyBookingResource extends JsonResource
             'user_id' => $this->user_id,
             'room_id' => $this->room_id,
             // 'no_guests' => $this->no_guests,
-            'check_in' => normalizeDate($this->getRawOriginal('check_in')),
-            'check_out' => normalizeDate($this->getRawOriginal('check_out')),
+            'check_in' => Carbon::parse($this->check_in)->format('F j, Y'), # normalizeDate($this->getRawOriginal('check_in')),
+            'check_out' => Carbon::parse($this->check_out)->format('F j, Y'), # normalizeDate($this->getRawOriginal('check_out')),
             'tour_type' => $this->tour_type,
             'total_price' => $this->total_price,
             'status' => $this->status,

@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Helpers;
+
 use Carbon\Carbon;
 
 function normalizeDate(?string $value)
